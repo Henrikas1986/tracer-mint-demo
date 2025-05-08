@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TRACER Mint Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 50px;
+      background-color: #f4f4f4;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    #wallet-address {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>TRACER Token Mint Demo (Sepolia)</h1>
+  <button onclick="connectWallet()">Connect Wallet</button>
+  <button onclick="mintTokens()">Mint 1,000 TRACER</button>
+  <div id="wallet-address"></div>
+  <div id="status"></div>
+
+  <script>
+    let provider;
+    let signer;
+    let contract;
+
+    const contractAddress = "0xe06c84322ec3523456714357143479De6E1B2C";
+    const contractABI = [
+      "function mint(address to, uint256 amount) public",
+      "function balanceOf(address account) view returns (uint256)"
+    ];
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        document.getElementById("wallet-address").innerText = "Connected: " + await signer.getAddress();
+        contract = new ethers.Contract(contractAddress, contractABI, signer);
+      } else {
+        alert("MetaMask not detected!");
+      }
+    }
+
+    async function mintTokens() {
+      if (!signer || !contract) {
+        alert("Connect wallet first.");
+        return;
+      }
+
+      const userAddress = await signer.getAddress();
+      const amount = ethers.utils.parseUnits("1000", 18);
+
+      try {
+        const tx = await contract.mint(userAddress, amount);
+        document.getElementById("status").innerText = "Minting... Tx Hash: " + tx.hash;
+        await tx.wait();
+        document.getElementById("status").innerText = "Mint successful!";
+      } catch (error) {
+        document.getElementById("status").innerText = "Error: " + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
