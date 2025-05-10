@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>TRACER Demo</title>
+ <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
+</head>
+<body>
+ <h1>TRACER Web3 Demo</h1>
+ <button id="connectBtn"> Connect Wallet</button>
+ <p id="walletAddress"></p>
+
+ <script>
+ const connectButton = document.getElementById("connectBtn");
+ const walletAddressDisplay = document.getElementById("walletAddress");
+
+ connectButton.onclick = async () => {
+ if (typeof window.ethereum !== 'undefined') {
+ try {
+ const provider = new ethers.providers.Web3Provider(window.ethereum);
+ await provider.send("eth_requestAccounts", []);
+ const signer = provider.getSigner();
+ const address = await signer.getAddress();
+ walletAddressDisplay.innerText = " Connected: " + address;
+ } catch (err) {
+ console.error(" Connection failed:", err);
+ walletAddressDisplay.innerText = " Failed to connect wallet";
+ }
+ } else {
+ walletAddressDisplay.innerText = " MetaMask not detected";
+ }
+ };
+ </script>
+</body>
+</html>
